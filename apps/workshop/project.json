@@ -1,0 +1,70 @@
+{
+  "name": "workshop",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "workshop",
+  "sourceRoot": "apps/workshop/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/workshop",
+        "index": "apps/workshop/src/index.html",
+        "browser": "apps/workshop/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/workshop/tsconfig.app.json",
+        "assets": ["apps/workshop/src/favicon.ico", "apps/workshop/src/assets"],
+        "styles": ["apps/workshop/src/styles.css"],
+        "scripts": [],
+        "server": "apps/workshop/src/main.server.ts",
+        "prerender": true,
+        "ssr": {
+          "entry": "apps/workshop/server.ts"
+        }
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "workshop:build:production"
+        },
+        "development": {
+          "buildTarget": "workshop:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "workshop:build"
+      }
+    }
+  }
+}
