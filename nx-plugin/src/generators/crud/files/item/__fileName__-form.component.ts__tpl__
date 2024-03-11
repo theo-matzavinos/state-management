@@ -1,0 +1,116 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
+import {
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { BrnCheckboxComponent } from '@spartan-ng/ui-checkbox-brain';
+import { HlmCheckboxImports } from '@spartan-ng/ui-checkbox-helm';
+import { HlmLabelDirective } from '@spartan-ng/ui-label-helm';
+
+import {
+  FORM_FIELD_COMPONENTS,
+  FormContainerDirective,
+  FormDeactivationDirective,
+  FormGridDirective,
+  FORM_FIELD_ERROR_COMPONENTS,
+  NumberInputComponent,
+  numberValidator
+} from '@slg/form';
+
+import type { Signal } from '@angular/core';
+import type { <%= dto %> } from '@app/dto';
+import type { ControlsOf } from '@slg/form';
+import { DatepickerComponent, dateValueValidator } from '@slg/datepicker';
+
+@Component({
+  selector: 'app-<%= fileName %>-form',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [FormContainerDirective],
+  imports: [
+    FORM_FIELD_COMPONENTS,
+    ReactiveFormsModule,
+    FORM_FIELD_ERROR_COMPONENTS,
+    FormDeactivationDirective,
+    NumberInputComponent,
+    CheckboxComponent,
+    DatepickerComponent,
+    FormGridDirective,
+    BrnCheckboxComponent,
+    HlmCheckboxImports,
+    HlmLabelDirective,
+  ],
+  template: `
+    <form id="<%= propertyName %>Form" slgFormDeactivation slgFormGrid [formGroup]="form">
+
+    <% for (const property of props) { -%>
+      <% if (property.type === 'boolean') { -%>
+        <label hlmLabel class="!flex-row items-center gap-x-2">
+          <brn-checkbox hlm [formControl]="form.controls.<%= property.key %>">
+            <hlm-checkbox-checkicon />
+          </brn-checkbox>
+          <%= property.key %>
+        </label>
+
+      <% } else { -%>
+      <slg-form-field>
+        <ng-container slgFormFieldLabel><%= property.key %></ng-container>
+        <% switch (property.type) {
+          case 'number': %>
+          <slg-number-input slgFormFieldInput [formControl]="form.controls.<%= property.key %>" />
+          <slg-number-error />
+          <% break; case 'Date': %>
+          <slg-datepicker slgFormFieldInput [formControl]="form.controls.<%= property.key %>" />
+          <slg-date-error />
+          <% break; default: %>
+          <input type="text" slgFormFieldInput [formControl]="form.controls.<%= property.key %>" />
+        <% } -%>
+      </slg-form-field>
+
+      <% } -%>
+    <% } -%>
+    </form>
+  `,
+})
+export class <%= className %>FormComponent {
+  value = input<<%= dto %> | undefined>(undefined);
+
+  form = injectForm(this.value);
+
+  reset() {
+    this.form.reset(this.value());
+  }
+}
+
+function injectForm(value: Signal<<%= dto %> | undefined>) {
+  const formBuilder = inject(NonNullableFormBuilder);
+  const form = formBuilder.group<ControlsOf<<%= dto %>>>({
+    <% for (const property of props) { -%>
+      <%= property.key %>: formBuilder.control(undefined, <% switch (property.type) {
+          case 'number': %>
+          { validators: [numberValidator] }
+          <% break; case 'Date': %>
+          { validators: [dateValueValidator] }
+        <% } -%>),
+    <% } -%>
+  });
+
+  effect(() => {
+    const currentValue = value();
+
+    if (form.pristine && currentValue) {
+      untracked(() => form.reset(currentValue));
+    }
+  });
+
+  return form;
+}

@@ -1,0 +1,91 @@
+import { HttpClient } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
+import { injectQuery } from '@tanstack/angular-query-experimental';
+
+import { ListQueryParamsState, listRouteMeta } from '@slg/list';
+import { PAGE_HEADER_COMPONENTS } from '@slg/page-header';
+import { PaginationComponent } from '@slg/pagination';
+import { QuerySuspenseComponent } from '@slg/suspense';
+import { TOOLBAR_COMPONENTS } from '@slg/toolbar';
+
+import { <%= searchEndpointName %> } from '@app/endpoints';
+
+import { <%= className %>FiltersComponent } from './<%= fileName %>-filters.component';
+import { <%= className %>TableComponent } from './<%= fileName %>-table.component';
+
+@Component({
+  selector: 'app-<%= fileName %>-list',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'flex flex-col flex-grow',
+  },
+  providers: [ListQueryParamsState],
+  imports: [
+    PaginationComponent,
+    PAGE_HEADER_COMPONENTS,
+    TOOLBAR_COMPONENTS,
+    <%= className %>FiltersComponent,
+    <%= className %>TableComponent,
+    QuerySuspenseComponent,
+  ],
+  template: `
+    <slg-page-header><%= label %></slg-page-header>
+
+    <slg-toolbar>
+      <a slg-create-btn></a>
+
+      <button slg-reload-btn [queryResult]="itemsQuery" (click)="itemsQuery.refetch()"></button>
+
+      <button
+        slg-clear-filters-btn
+        (click)="listQueryParamsState.changeFilter()"
+      ></button>
+
+      <app-<%= fileName %>-filters
+        [filters]="listQueryParamsState.filter()"
+        (filtersChange)="listQueryParamsState.changeFilter($event)"
+      />
+    </slg-toolbar>
+
+    <slg-query-suspense class="flex-grow" [queryResult]="itemsQuery">
+      <app-<%= fileName %>-table
+        class="flex-grow"
+        [items]="items()"
+        [sort]="listQueryParamsState.sort()"
+        (sortChange)="listQueryParamsState.changeSort($event)"
+      />
+    </slg-query-suspense>
+
+    <slg-pagination
+      [page]="listQueryParamsState.page()"
+      [pageSize]="listQueryParamsState.pageSize()"
+      [rowsCount]="rowCount()"
+      (pageChange)="listQueryParamsState.changePage($event)"
+      (pageSizeChange)="listQueryParamsState.changePageSize($event)"
+    />
+  `,
+})
+export default class <%= className %>ListComponent {
+  listQueryParamsState = inject(ListQueryParamsState);
+  itemsQuery = injectItemsQuery();
+  items = computed(() => this.itemsQuery.data()?.data);
+  rowCount = computed(() => this.itemsQuery.data()?.metadata.rowCount);
+}
+
+function injectItemsQuery() {
+  const listQueryParamsState = inject(ListQueryParamsState);
+  const httpClient = inject(HttpClient);
+
+  return injectQuery(
+    () => ({
+      queryKey: ['<%= propertyName %>', 'list', listQueryParamsState.httpQueryParams()] as const,
+      queryFn: ({ queryKey }) => <%= searchEndpointName %>(httpClient, queryKey[2])
+    })
+  );
+}

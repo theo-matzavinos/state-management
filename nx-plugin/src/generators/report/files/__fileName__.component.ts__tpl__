@@ -1,0 +1,114 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { <%= reportEndpointName %> } from '@app/endpoints';
+
+import { injectDownloadMutation } from '@slg/download';
+import {
+  FORM_FIELD_COMPONENTS,
+  FormContainerDirective,
+  FormGridDirective,
+} from '@slg/form';
+import { PAGE_HEADER_COMPONENTS } from '@slg/page-header';
+import {
+  ReportParamsDirective,
+  injectReportParams,
+  reportRouteMeta,
+} from '@slg/report';
+import { TOOLBAR_COMPONENTS } from '@slg/toolbar';
+
+import type { <%= dto %> } from '@app/dto';
+import type { ControlsOf } from '@slg/form';
+
+export const routeMeta = reportRouteMeta();
+
+@Component({
+  selector: 'app-<%= fileName %>',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'flex flex-col flex-grow',
+  },
+  imports: [
+    PAGE_HEADER_COMPONENTS,
+    TOOLBAR_COMPONENTS,
+    FORM_FIELD_COMPONENTS,
+    ReactiveFormsModule,
+    FormGridDirective,
+    FormContainerDirective,
+    ReportParamsDirective,
+  ],
+  template: `
+    <slg-page-header><%= label %></slg-page-header>
+
+    <slg-toolbar>
+      <button
+        form="<%= propertyName %>Form"
+        isReport
+        slg-submit-btn
+        [mutationResult]="downloadMutation"
+        (click)="export()"
+      ></button>
+      <button slg-reset-form-btn (click)="reset()"></button>
+    </slg-toolbar>
+
+    <div slgFormContainer>
+      <form id="<%= propertyName %>Form" slgFormGrid slgReportParams [formGroup]="form">
+      <% for (const property of props) { -%>
+      <% if (property.type === 'boolean') { -%>
+        <slg-checkbox [formControl]="form.controls.<%= property.key %>">
+          <%= property.key %>
+        </slg-checkbox>
+
+      <% } else { -%>
+      <slg-form-field>
+        <ng-container slgFormFieldLabel><%= property.key %></ng-container>
+        <% switch (property.type) {
+          case 'number': %>
+          <slg-number-input slgFormFieldInput [formControl]="form.controls.<%= property.key %>" />
+          <slg-number-error />
+          <% break; case 'Date': %>
+          <slg-datepicker slgFormFieldInput [formControl]="form.controls.<%= property.key %>" />
+          <slg-date-error />
+          <% break; default: %>
+          <input type="text" slgFormFieldInput [formControl]="form.controls.<%= property.key %>" />
+        <% } -%>
+      </slg-form-field>
+
+      <% } -%>
+    <% } -%>
+      </form>
+    </div>
+  `,
+})
+export default class <%= className %>Component {
+  downloadMutation = injectDownloadMutation(
+    <%= reportEndpointName %>,
+  );
+  form = injectForm();
+
+  export() {
+    this.downloadMutation.mutate(
+      this.form.value as <%= dto %>,
+    );
+  }
+
+  reset() {
+    this.form.reset();
+  }
+}
+
+function injectForm() {
+  const formBuilder = inject(NonNullableFormBuilder);
+  const params = injectReportParams<<%= dto %>>()();
+
+  return formBuilder.group<ControlsOf<<%= dto %>>>({
+    <% for (const property of props) { -%>
+      <%= property.key %>: formBuilder.control(undefined, <% switch (property.type) {
+          case 'number': %>
+          { validators: [numberValidator] }
+          <% break; case 'Date': %>
+          { validators: [dateValueValidator] }
+        <% } -%>),
+    <% } -%>
+  });
+}

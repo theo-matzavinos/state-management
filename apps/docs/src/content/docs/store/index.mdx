@@ -1,0 +1,155 @@
+---
+title: Intro
+template: doc
+sidebar:
+  order: 1
+---
+
+import { Code, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import store from 'apps/docs/snips/store/store?raw';
+import exampleActions from 'apps/docs/snips/store/example.actions?raw';
+import dispatchExampleActions from 'apps/docs/snips/store/dispatch-example-actions?raw';
+import createReducer from 'apps/docs/snips/store/create-reducer?raw';
+import exampleReducer from 'apps/docs/snips/store/example.reducer?raw';
+import createSelector from 'apps/docs/snips/store/create-selector?raw';
+import exampleSelectors from 'apps/docs/snips/store/example.selectors?raw';
+import exampleEffects from 'apps/docs/snips/store/example.effects?raw';
+import createFeature from 'apps/docs/snips/store/create-feature?raw';
+import exampleFeature from 'apps/docs/snips/store/example.feature?raw';
+
+[Official docs](https://ngrx.io/docs)
+
+@ngrx/store + @ngrx/effects is the most popular state management solution for Angular.
+
+It's an implementation of the Redux pattern using rxjs.
+
+The app's state is stored in a single object exposed through an Observable.
+
+We update the value by dispatching and handling actions.
+
+<Code code={store} lang="ts" />
+
+## Key concepts
+
+- **Actions** that describe unique events.
+- **Reducers** that handle events and update the state.
+- **Selectors** that are used to read from the store and compute derived values.
+- **Effects** for logic that doesn't immediately (or at all) affect state.
+
+![State Management Lifecycle Diagram](https://ngrx.io/generated/images/guide/store/state-management-lifecycle.png)
+
+### Actions
+
+Actions describe unique events that happen in the application. All actions have a type property which must be unique. Actions can optionally have additional data (payload).
+
+We create action creator functions using the `createActionGroup` function.
+To define actions that don't have a payload we can use the `emptyProps` function.
+To define actions that have a payload we can use the generic `props` function.
+
+<Tabs>
+  <TabItem label="Define actions creators">
+    <Code code={exampleActions} lang="ts" />
+  </TabItem>
+  <TabItem label="Dispatch actions">
+    <Code code={dispatchExampleActions} lang="ts" />
+  </TabItem>
+</Tabs>
+
+<Aside>
+Actions represent unique event types and should not be reused - the action must be identifiable by its **type**, not its payload.
+Even if multiple sources dispatch similar actions (same payload) we should create a separate action for each source.
+This helps with debugging and makes it easier to have different handling for the actions if necessary.
+
+Actions represent events and not commands. We are saying that something happened, not that something should happen.
+
+</Aside>
+
+<Aside>
+  The `props` function only accepts 1 type argument which must be an object.
+  `props<number>()` or `props<{ one: string }, { two: number }>()` are invalid.
+  Use `props<{ magic: number }>()` or `props<{ one: string, two: number }>()` instead.
+</Aside>
+
+### Reducers
+
+We use reducers to define slices/parts/pieces of state.
+Reducers define the initial state of the slice they manage and the action handlers which update the state.
+
+<Tabs>
+  <TabItem label="create-reducer.ts">
+    <Code code={createReducer} lang="ts" />
+  </TabItem>
+
+  <TabItem label="example.reducer.ts">
+    <Code code={exampleReducer} lang="ts" />
+  </TabItem>
+</Tabs>
+
+<Aside type="caution">
+  Action handlers must be **pure functions** and treat state as **immutable**.
+  In human words: we must always return a new object when we want to update
+  state. **This also applies to nested object/arrays.** `previousValue !==
+  newValue` **must** be `true`.
+</Aside>
+
+<Aside>
+  It's good practice to declare the action handler's return type explicitly. If
+  omitted we can accidentally return extra properties that are not part of the
+  state's type.
+</Aside>
+
+### Selectors
+
+We use selectors to read values from the Store.
+
+We can also compose multiple selectors to derive/compute values.
+
+Selectors are **memoized**. They cache the latest value returned and only recomputed when their input values change.
+
+To create a selector we use the `createSelector` function.
+We must provide a **projector** function that recieves the input value and returns the value we want to read.
+If we don't provide any input selector(s) the input value is the whole app's state, otherwise it is the result(s) of the input selector(s).
+
+<Tabs>
+  <TabItem label="create-selector.ts">
+    <Code code={createSelector} lang="ts" />
+  </TabItem>
+  <TabItem label="example.selectors.ts">
+    <Code code={exampleSelectors} lang="ts" />
+  </TabItem>
+</Tabs>
+
+### Effects
+
+We use effects for handling async tasks (ex. http requests) or for tasks that don't update the app's state (ex. showing a toast).
+
+We create effects using the `createEffect` function.
+We must provide a function (effect source) that returns an `Observable` and _optionally_ a configuration object.
+
+If the effect source function returns an `Observable<Action>` the actions emmited will be dispatched automatically.
+If we don't want to dispatch actions as a result of the effect we must set `dispatch: false` on the configuration object.
+
+The `Actions` service provides an observable of the actions that are dispatched in the app.
+We can use the `ofType` operator to filter the actions by type.
+
+<Code code={exampleEffects} lang="ts" />
+
+<Aside type="caution">
+It is important to handle errors in effects as any uncaught error will kill the effect. We must return an `Observable<Action>` from `catchError` or use the `EMPTY` observable.
+</Aside>
+
+### Features
+
+Each slice of state needs a unique name (the property key where the state will live on the global state object).
+We can use the `createFeature` function to tie a reducer to a name.
+It will also create selectors for selecting the whole slice and each property of it.
+If we need more selectors we can use the `extraSelectors` property.
+
+<Tabs>
+  <TabItem label="create-feature.ts">
+    <Code code={createFeature} lang="ts" />
+  </TabItem>
+  <TabItem label="example.feature.ts">
+    <Code code={exampleFeature} lang="ts" />
+  </TabItem>
+</Tabs>

@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "id": "init",
+  "type": "object",
+  "cli": "nx",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Workspace name",
+      "x-prompt": "What is the workspace's name?"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@slg/toast",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "ngx-sonner": "^0.3.2"
+  },
+  "dependencies": {},
+  "sideEffects": false
+}

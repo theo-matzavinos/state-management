@@ -1,0 +1,80 @@
+{
+  "name": "query",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/query/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:application",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/apps/query",
+        "index": "apps/query/src/index.html",
+        "browser": "apps/query/src/main.ts",
+        "polyfills": [
+          "zone.js"
+        ],
+        "tsConfig": "apps/query/tsconfig.app.json",
+        "assets": [
+          "apps/query/src/favicon.ico",
+          "apps/query/src/assets"
+        ],
+        "styles": [
+          "apps/query/src/styles.css"
+        ],
+        "scripts": [
+          "libs/shared/layout/src/lib/color-scheme-detection.ts"
+        ]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@nx/angular:dev-server",
+      "options": {
+        "port": 42069,
+        "proxyConfig": "apps/query/proxy.conf.json"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "query:build:production"
+        },
+        "development": {
+          "buildTarget": "query:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "query:build"
+      }
+    }
+  }
+}

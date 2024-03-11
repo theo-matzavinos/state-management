@@ -1,0 +1,26 @@
+{
+  "name": "todos",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/todos/src",
+  "prefix": "todos",
+  "tags": [],
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:ng-packagr-lite",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "project": "libs/todos/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/todos/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/todos/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    }
+  }
+}

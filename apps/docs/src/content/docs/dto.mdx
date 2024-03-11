@@ -1,0 +1,23 @@
+---
+title: DTOs
+template: doc
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+import todoDetailsDto from 'apps/docs/snips/dto/todo-details-dto?raw';
+import todoDonenessDto from 'apps/docs/snips/dto/todo-doneness-dto?raw';
+import todoDoneness from 'apps/docs/snips/dto/todo-doneness?raw';
+import todoListItemDto from 'apps/docs/snips/dto/todo-list-item-dto?raw';
+import todosListDto from 'apps/docs/snips/dto/todos-list-dto?raw';
+
+<Code
+  code={`
+${todoDoneness}
+${todoDonenessDto.replace(/import.+;/, '').trimStart()}
+${todoListItemDto.replace(/import.+;/, '').trimStart()}
+${todosListDto.replace(/import.+;/, '').trimStart()}
+${todoDetailsDto.replace(/import.+;/, '').trimStart()}
+`}
+  lang="ts"
+/>

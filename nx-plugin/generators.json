@@ -1,0 +1,40 @@
+{
+  "generators": {
+    "init": {
+      "factory": "./src/generators/init/index",
+      "schema": "./src/generators/init/schema.json",
+      "description": "init generator",
+      "hidden": true
+    },
+    "shared": {
+      "factory": "./src/generators/shared/index",
+      "schema": "./src/generators/shared/schema.json",
+      "description": "shared lib generator"
+    },
+    "component": {
+      "factory": "./src/generators/component/index",
+      "schema": "./src/generators/component/schema.json",
+      "description": "component generator"
+    },
+    "openapi": {
+      "factory": "./src/generators/openapi/index",
+      "schema": "./src/generators/openapi/schema.json",
+      "description": "generate types and services from openapi"
+    },
+    "crud": {
+      "factory": "./src/generators/crud/index",
+      "schema": "./src/generators/crud/schema.json",
+      "description": "generate components for crud"
+    },
+    "report": {
+      "factory": "./src/generators/report/index",
+      "schema": "./src/generators/report/schema.json",
+      "description": "generate components for report"
+    },
+    "eslint": {
+      "factory": "./src/generators/eslint/index",
+      "schema": "./src/generators/eslint/schema.json",
+      "hidden": true
+    }
+  }
+}

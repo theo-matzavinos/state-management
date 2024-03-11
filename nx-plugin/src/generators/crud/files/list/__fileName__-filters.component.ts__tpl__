@@ -1,0 +1,52 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
+
+import { FILTERS_COMPONENTS } from '@slg/filters';
+
+import type { Filter } from '@slg/filters';
+
+@Component({
+  selector: 'app-<%= fileName %>-filters',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FILTERS_COMPONENTS],
+  template: `
+    <slg-filters
+      [filters]="filters"
+      (filtersChange)="filtersChange.emit($event)"
+    >
+    <% for (const property of props) { -%>
+      <% switch (property.type) {
+        case 'number': %>
+        <slg-number-filter key="<%= property.key %>">
+          <%= property.key %>
+        </slg-number-filter>
+        <% break; case 'Date': %>
+        <slg-date-filter key="<%= property.key %>">
+          <%= property.key %>
+        </slg-date-filter>
+        <% break; case 'boolean': %>
+        <slg-boolean-filter key="<%= property.key %>">
+          <%= property.key %>
+        </slg-boolean-filter>
+        <% break; default: %>
+        <slg-text-filter key="<%= property.key %>">
+          <%= property.key %>
+        </slg-text-filter>
+      <% } -%>
+    <% } -%>
+    </slg-filters>
+  `,
+})
+export class <%= className %>FiltersComponent {
+  @Input() filters?: Record<string, Filter>;
+
+  @Output() filtersChange = new EventEmitter<
+    Record<string, Filter> | undefined
+  >();
+}

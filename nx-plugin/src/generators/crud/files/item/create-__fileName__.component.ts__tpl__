@@ -1,0 +1,96 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewChild,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { injectMutation } from '@tanstack/angular-query-experimental';
+
+import { PAGE_HEADER_COMPONENTS } from '@slg/page-header';
+import { ToastService } from '@slg/toast';
+import { TOOLBAR_COMPONENTS } from '@slg/toolbar';
+
+import { <%= className %>FormComponent } from './<%= fileName %>-form.component';
+
+import type { <%= dto %> } from '@app/dto';
+import type { ComponentWithForm } from '@slg/form';
+import { HttpClient } from '@angular/common/http';
+import { FormGroup } from '@angular/forms';
+import { <%= createEndpointName %> } from '@app/endpoints';
+
+@Component({
+  selector: 'app-create-<%= fileName %>',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    <%= className %>FormComponent,
+    PAGE_HEADER_COMPONENTS,
+    TOOLBAR_COMPONENTS,
+  ],
+  template: `
+    <slg-page-header>
+      <a slg-backlink></a>
+      New <%= label %>
+    </slg-page-header>
+
+    <slg-toolbar>
+      <button
+        form="<%= propertyName %>Form"
+        slg-submit-btn
+        [mutationResult]="createMutation"
+        (click)="submit()"
+      ></button>
+
+      <button
+        slg-reset-form-btn
+        [disabled]="createMutation.isPending()"
+        (click)="<%= propertyName %>Form()?.reset()"
+      ></button>
+    </slg-toolbar>
+
+    <slg-<%= fileName %>-form />
+  `,
+})
+export default class Create<%= className %>Component implements ComponentWithForm {
+    @ViewChild(<%= className %>FormComponent) set _<%= propertyName %>Form(form: <%= className %>FormComponent) {
+    this.<%= propertyName %>Form.set(form);
+  }
+  <%= propertyName %>Form = signal<<%= className %>FormComponent | undefined>(undefined);
+
+  get form() {
+    return this.<%= propertyName %>Form()?.form;
+  }
+
+  createMutation = injectCreateMutation(() => this.form);
+
+  submit() {
+    if (!this.form?.valid) {
+      return;
+    }
+
+    this.createMutation.mutate(this.form.value as <%= dto %>);
+  }
+}
+
+function injectCreateMutation(form: () => FormGroup | undefined) {
+  const httpClient = inject(HttpClient);
+  const router = inject(Router);
+  const activatedRoute = inject(ActivatedRoute);
+  const toastService = inject(ToastService);
+
+  return injectMutation(() => ({
+    mutationFn: (item: <%= dto %>) => <%= createEndpointName %>(httpClient, item),
+          onSuccess: ({ data }) => {
+        form()?.markAsPristine();
+        toastService.showDefaultCreationSuccess();
+        router.navigate(['..', data.id], {
+          relativeTo: activatedRoute,
+        });
+      },
+      onError: (error) => {
+        toastService.showDefaultError(error);
+      },
+  }))
+}

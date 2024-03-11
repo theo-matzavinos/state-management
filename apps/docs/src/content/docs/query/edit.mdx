@@ -1,0 +1,27 @@
+---
+title: Edit
+template: doc
+sidebar:
+  order: 5
+---
+
+import { Code, Tabs, TabItem } from '@astrojs/starlight/components';
+import actions from 'apps/docs/snips/store/edit-todo.actions?raw';
+import feature from 'apps/docs/snips/store/edit-todo.feature?raw';
+import effects from 'apps/docs/snips/store/edit-todo.effects?raw';
+import component from 'apps/docs/snips/store/edit-todo?raw';
+
+<Tabs>
+  <TabItem label="edit-todo.actions.ts">
+    <Code code={actions} lang="ts" />
+  </TabItem>
+  <TabItem label="edit-todo.feature.ts">
+    <Code code={feature} lang="ts" />
+  </TabItem>
+  <TabItem label="edit-todo.effects.ts">
+    <Code code={effects} lang="ts" />
+  </TabItem>
+  <TabItem label="edit-todo.ts">
+    <Code code={component} lang="ts" />
+  </TabItem>
+</Tabs>

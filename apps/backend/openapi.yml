@@ -1,0 +1,178 @@
+openapi: 3.0.0
+paths:
+  /api/Todos:
+    get:
+      operationId: apiTodosGet
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: pageSize
+          required: true
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodosListDto'
+      tags:
+        - Todos
+    post:
+      operationId: apiTodosPost
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoDetailsDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoDetailsDto'
+      tags:
+        - Todos
+  /api/Todos/{id}:
+    get:
+      operationId: apiTodosIdGet
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoDetailsDto'
+      tags:
+        - Todos
+    put:
+      operationId: apiTodosIdPut
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoDetailsDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoDetailsDto'
+      tags:
+        - Todos
+    delete:
+      operationId: apiTodosIdDelete
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '204':
+          description: ''
+      tags:
+        - Todos
+  /api/TodoDoneness:
+    get:
+      operationId: apiTodoDonenessGet
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TodoDonenessDto'
+      tags:
+        - TodoDoneness
+info:
+  title: TODOs
+  description: ''
+  version: 1.0.0
+  contact: {}
+tags: []
+servers: []
+components:
+  schemas:
+    TodoDoneness:
+      type: number
+      enum:
+        - 0
+        - 1
+        - 2
+    TodoListItemDto:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        doneness:
+          $ref: '#/components/schemas/TodoDoneness'
+      required:
+        - id
+        - title
+        - doneness
+    TodosListDto:
+      type: object
+      properties:
+        todos:
+          type: array
+          items:
+            $ref: '#/components/schemas/TodoListItemDto'
+        count:
+          type: number
+      required:
+        - todos
+        - count
+    TodoDetailsDto:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        doneness:
+          $ref: '#/components/schemas/TodoDoneness'
+        description:
+          type: string
+      required:
+        - id
+        - title
+        - doneness
+        - description
+    TodoDonenessDto:
+      type: object
+      properties:
+        value:
+          $ref: '#/components/schemas/TodoDoneness'
+        text:
+          type: string
+      required:
+        - value
+        - text

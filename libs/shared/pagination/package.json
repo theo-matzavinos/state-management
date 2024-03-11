@@ -1,0 +1,10 @@
+{
+  "name": "@slg/pagination",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/core": "^17.0.0",
+    "@spartan-ng/ui-pagination-helm": "0.0.1"
+  },
+  "dependencies": {},
+  "sideEffects": false
+}

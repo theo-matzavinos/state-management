@@ -1,0 +1,2 @@
+export type <%= className %> = <%- enumValues.map(v => v.value).join(' | ') %>
+

@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "id": "openapi",
+  "type": "object",
+  "cli": "nx",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "The name of the project.",
+      "$default": {
+        "$source": "projectName"
+      }
+    },
+    "endpoints": {
+      "type": "string",
+      "description": "Name of endpoints file without extension.",
+      "examples": [
+        "parametropoihsh-proeispraksewn-endpoints",
+        "user-activity-endpoints"
+      ]
+    },
+    "path": {
+      "type": "string",
+      "description": "The route path at which to create the files.",
+      "aliases": [
+        "dir",
+        "directory"
+      ],
+      "x-priority": "important",
+      "examples": [
+        "accounting/(reports)/prepayments-parameters",
+        "accounting/(reports)/user-activity"
+      ]
+    },
+    "label": {
+      "type": "string",
+      "description": "The label of the menu entry.",
+      "examples": [
+        "Παραμετροιποίηση Προεισπράξεων",
+        "Ενέργειες Χρηστών"
+      ]
+    }
+  },
+  "required": [
+    "endpoints",
+    "path",
+    "project",
+    "label"
+  ]
+}

@@ -1,0 +1,85 @@
+---
+title: Intro
+template: doc
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## What?
+
+We need some way to manage server state (usually http requests).
+
+The methods discussed can be applied to any type of async state, like device APIs (camera, etc).
+
+## For why?
+
+UX. Displaying spinners when requests are pending, error messages when things go boom, etc. Some caching would be nice as well.
+
+Also DX. It is possible to achieve similar results without using a pattern/library/framework if you want to spend most of your time debugging your own pattern/library/framework.
+
+## Specs?
+
+A TODO app (so original) disguised as a CRUD app.
+
+1. List page with pagination
+2. Creation page
+3. Edit page
+4. Delete confirmation dialog
+
+We also need to load the values of an enum.
+
+### List page
+
+- Reload button
+  - Disabled when load request pending
+  - Spin icon when load request pending
+- List
+  - Show spinner when items are loading
+  - Don't show spinner when reloading
+  - Display error if load request errors
+  - Show empty message if no items
+- Pagination
+  - Use URL queryParams as source of truth
+  - When navigating to list if pagination queryParams missing patch URL with previous values
+- On delete success
+  - Remove TODO from state
+  - Reload
+- Toast on delete error
+
+### Creation page
+
+- Disable submit button when creation request pending
+- On creation request success
+  - Toast
+  - Navigate to edit page
+- On creation request error show toast
+
+### Edit page
+
+- When update request pending
+  - Disable delete button
+  - Disable submit button
+- Toast on update request success
+- Toast on update request error
+- On delete success
+  - Remove TODO from state
+  - Navigate to list
+- Toast on delete error
+
+## HowTo?
+
+<Code
+  code="npx nx preview backend"
+  frame="terminal"
+  title="Run the backend (doesn't watch for file changes)"
+/>
+<Code
+  code="npx nx serve store"
+  frame="terminal"
+  title="Run the app built with @ngrx/store"
+/>
+<Code
+  code="npx nx serve query"
+  frame="terminal"
+  title="Run the app built with @tanstack/query"
+/>

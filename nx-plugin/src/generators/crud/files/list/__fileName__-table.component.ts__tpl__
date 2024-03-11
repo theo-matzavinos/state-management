@@ -1,0 +1,103 @@
+import { HttpClient } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  inject,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { lucidePencil, lucideTrash } from '@ng-icons/lucide';
+import { injectMutation } from '@tanstack/angular-query-experimental';
+import { BrnDialogImports } from '@spartan-ng/ui-dialog-brain';
+import { HlmDialogImports } from '@spartan-ng/ui-dialog-helm';
+import { HlmButtonDirective } from '@spartan-ng/ui-button-helm';
+
+import { DeleteDialogComponent } from '@slg/delete-dialog';
+import { HlmIconComponent, provideIcons } from '@spartan-ng/ui-icon-helm';
+import { TABLE_COMPONENTS } from '@slg/table';
+
+import { <%= deleteEndpointName %> } from '@app/endpoints';
+
+import type { <%= dto %> } from '@app/dto';
+import type { Sort } from '@slg/list';
+
+@Component({
+  selector: 'app-<%= fileName %>-table',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons({ edit: lucidePencil, delete: lucideTrash })],
+  imports: [
+    TABLE_COMPONENTS,
+    HlmIconComponent,
+    HlmButtonDirective,
+    RouterLink,
+    DeleteDialogComponent,
+    BrnDialogImports,
+    HlmDialogImports,
+  ],
+  template: `
+    <slg-table
+      [data]="items"
+      [sort]="sort"
+      (sortChange)="sortChange.emit($event)"
+    >
+      <ng-container slgColumnDef="actions">
+        <div *slgCellDef="let item; dataType: dataType" class="flex">
+          <a variant="ghost" hlmBtn [routerLink]="[item.id]" size="icon">
+            <slg-icon name="edit" size="sm" />
+          </a>
+
+          <hlm-dialog>
+            <button
+              type="button"
+              variant="link"
+              brnDialogTrigger
+              hlmBtn
+              size="icon"
+            >
+              <hlm-icon name="delete" />
+            </button>
+            <hlm-dialog-content *brnDialogContent="let ctx">
+              <slg-delete-dialog [item]="item" [mutation]="deleteMutation" />
+            </hlm-dialog-content>
+          </hlm-dialog>
+        </div>
+      </ng-container>
+
+    <% for (const property of props) { -%>
+      <% switch (property.type) {
+        case 'number': %>
+        <slg-number-column key="<%= property.key %>" label="<%= property.key %>" />
+        <% break; case 'Date': %>
+        <slg-date-column key="<%= property.key %>" label="<%= property.key %>" />
+        <% break; case 'boolean': %>
+        <slg-boolean-column key="<%= property.key %>" label="<%= property.key %>" />
+        <% break; default: %>
+        <ng-container slgColumnDef="<%= property.key %>" label="<%= property.key %>" />
+      <% } -%>
+    <% } -%>
+    </slg-table>
+  `,
+})
+export class <%= className %>TableComponent {
+  @Input() items?: <%= dto %>[];
+  @Input() sort?: Sort;
+
+  @Output() sortChange = new EventEmitter<Sort | undefined>();
+
+  dataType!: <%= dto %>;
+  deleteMutation = injectDeleteMutation();
+}
+
+function injectDeleteMutation() {
+  const httpClient = inject(HttpClient);
+
+  return injectMutation((queryClient) => ({
+    mutationFn: (item: <%= dto %>) => <%= deleteEndpointName %>(httpClient, { id:item.id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['<%= propertyName %>', 'list'] });
+    }
+  }))
+}

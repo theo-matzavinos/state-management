@@ -1,0 +1,152 @@
+import { HttpClient } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  ViewChild,
+  inject,
+  numberAttribute,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  injectMutation,
+  injectQuery,
+} from '@tanstack/angular-query-experimental';
+import { BrnDialogImports } from '@spartan-ng/ui-dialog-brain';
+import { HlmDialogImports } from '@spartan-ng/ui-dialog-helm';
+
+import { DeleteDialogComponent } from '@slg/delete-dialog';
+import { PAGE_HEADER_COMPONENTS } from '@slg/page-header';
+import { QuerySuspenseComponent } from '@slg/suspense';
+import { ToastService } from '@slg/toast';
+import { TOOLBAR_COMPONENTS } from '@slg/toolbar';
+
+import { <%= className %>FormComponent } from './<%= fileName %>-form.component';
+
+import type { <%= dto %> } from '@app/dto';
+import type { ComponentWithForm } from '@slg/form';
+import { FormGroup } from '@angular/forms';
+import { <%= findEndpointName %>, <%= updateEndpointName %>, <%= deleteEndpointName %> } from '@app/endpoints';
+import { injectParams } from 'ngxtension/inject-params'
+
+@Component({
+  selector: 'app-edit-<%= fileName %>',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    <%= className %>FormComponent,
+    PAGE_HEADER_COMPONENTS,
+    TOOLBAR_COMPONENTS,
+    QuerySuspenseComponent,
+    DeleteDialogComponent,
+    BrnDialogImports,
+    HlmDialogImports,
+  ],
+  template: `
+    <slg-page-header>
+      <a slg-backlink></a>
+      Επεξεργασία <%= label %>
+    </slg-page-header>
+
+    <slg-toolbar>
+      <button
+        form="<%= propertyName %>Form"
+        slg-submit-btn
+        [mutationResult]="updateMutation"
+        (click)="submit()"
+      ></button>
+
+      <a slg-create-btn></a>
+
+      <button
+        slg-reset-form-btn
+        [disabled]="updateMutation.isPending()"
+        (click)="<%= propertyName %>Form()?.reset()"
+      ></button>
+
+      <hlm-dialog>
+        <button
+          slg-delete-btn
+          brnDialogTrigger
+          [disabled]="itemQuery.isLoading() || updateMutation.isPending()"
+        ></button>
+        <hlm-dialog-content *brnDialogContent="let ctx">
+          <slg-delete-dialog
+            [item]="itemQuery.data()"
+            [mutation]="deleteMutation"
+          />
+        </hlm-dialog-content>
+      </hlm-dialog>
+    </slg-toolbar>
+
+    <slg-query-suspense [queryResult]="itemQuery">
+      <app-<%= fileName %>-form [value]="itemQuery.data()?.data" />
+    </slg-query-suspense>
+  `,
+})
+export default class Edit<%= className %>Component implements ComponentWithForm {
+  @ViewChild(<%= className %>FormComponent) set _<%= propertyName %>Form(form: <%= className %>FormComponent) {
+    this.<%= propertyName %>Form.set(form);
+  }
+  <%= propertyName %>Form = signal<<%= className %>FormComponent | undefined>(undefined);
+
+  itemQuery = injectItemQuery();
+  updateMutation = injectUpdateMutation(() => this.form);
+  deleteMutation = injectDeleteMutation(() => this.form);
+
+  get form() {
+    return this.<%= propertyName %>Form()?.form;
+  }
+
+  submit() {
+    if (!this.form?.valid) {
+      return;
+    }
+
+    this.updateMutation.mutate(this.form.value as <%= dto %>);
+  }
+}
+
+function injectItemQuery() {
+  const httpClient = inject(HttpClient);
+  const activatedRoute = inject(ActivatedRoute);
+  const id = injectParams(params => parseInt(params['<%= propertyName %>Id'], 10));
+
+  return injectQuery(() => ({
+    queryKey: ['<%= propertyName %>', 'details', id()] as const,
+    queryFn: ({ queryKey }) => <%= findEndpointName %>(httpClient, { id: queryKey[2] }),
+    enabled: !(id() == undefined || isNaN(id()))
+  }));
+}
+
+function injectUpdateMutation(form: () => FormGroup | undefined) {
+  const httpClient = inject(HttpClient);
+  const toastService = inject(ToastService);
+
+  return injectMutation((queryClient) => ({
+    mutationFn: (item: <%= dto %>) => <%= updateEndpointName %>(httpClient, item, item),
+    onSuccess: () => {
+      form()?.markAsPristine();
+      queryClient.invalidateQueries({ queryKey: ['<%= propertyName %>', 'details']})
+      toastService.showDefaultUpdateSuccess();
+    },
+    onError: (error) => {
+        toastService.showDefaultError(error);
+      },
+  }))
+}
+
+function injectDeleteMutation(form: () => FormGroup | undefined) {
+  const httpClient = inject(HttpClient);
+    const router = inject(Router);
+  const activatedRoute = inject(ActivatedRoute);
+
+  return injectMutation(() => ({
+    mutationFn: (item: <%= dto %>) => <%= deleteEndpointName %>(httpClient, { id:item.id }),
+    onSuccess: () => {
+          form()?.markAsPristine();
+        router.navigate(['..'], { relativeTo: activatedRoute });
+    }
+  }))
+}

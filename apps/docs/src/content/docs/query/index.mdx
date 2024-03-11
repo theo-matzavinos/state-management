@@ -1,0 +1,130 @@
+---
+title: Intro
+template: doc
+sidebar:
+  order: 1
+---
+
+import { Code, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import injectQuery from 'apps/docs/snips/query/inject-query?raw';
+import exampleQuery from 'apps/docs/snips/query/example-query?raw';
+import queryResult from 'apps/docs/snips/query/query-result?raw';
+import mutationResult from 'apps/docs/snips/query/mutation-result?raw';
+import exampleMutation from 'apps/docs/snips/query/example-mutation?raw';
+
+[Official docs](https://tanstack.com/query/latest/docs/framework/angular/overview)
+
+Managing server state with client-state-management libs (@ngrx etc) is not the best experience.
+Server state is not **OUR** state.
+
+@tanstack/query is a library for data-fetching/server state management.
+It handles:
+
+- Caching
+- Request deduping
+- Background syncing
+- Memory management
+
+## Key concepts
+
+- **Queries** are requests that **read** data from the server.
+- **Mutations** are requests that **change** data on the server.
+
+### Queries
+
+To create queries we use the `injectQuery` function.
+We must provide it with a function that returns an object with at least the `queryKey` and `queryFn` properties.
+It returns a `QueryResult` object.
+
+<Tabs>
+  <TabItem label="inject-query.ts">
+    <Code code={injectQuery} lang="ts" />
+  </TabItem>
+  <TabItem label="query-result.ts">
+    <Code code={queryResult} lang="ts" />
+  </TabItem>
+  <TabItem label="example-query.ts">
+    <Code code={exampleQuery} lang="ts" />
+  </TabItem>
+</Tabs>
+
+<Aside>
+  The `injectQuery` function expects a function as a parameter because it wraps
+  it inside a `computed`. This means that if we're reading from signals and any
+  of their values change the query will react and re-run.
+</Aside>
+
+#### queryKey
+
+The `queryKey` property is of type `any[]`.
+It is used to identify the query for refetching, caching, and sharing so it must be unique.
+
+<Aside>
+  Any parameters (pagination, filters, etc) used for the request should be part
+  of the `queryKey`.
+</Aside>
+
+<Aside type="tip">
+  It's good practice to have the static parts of the `queryKey` in the begining
+  of the array and the dynamic parts in the end.
+</Aside>
+
+#### queryFn
+
+The `queryFn` property can be any function that returns a `Promise`.
+This function receives an object that includes the value of the `queryKey`.
+
+#### Query caching
+
+@tanstack/query simulates the browser's `stale-while-revalidate` caching method.
+When a request is made it checks if the result exists in the cache.
+
+- If it doesn't exist it makes the request to the server and caches the response.
+- If it exists and it is **fresh** it returns the cached result immediately.
+- If it exists and it is **stale** it returns the cached result immediately and makes a request to the server to get a **fresh** response and update the cache and the result.
+
+#### Behaviors
+
+By default all cached data is considered **stale**.
+This can be configured by the `staleTime` property (in milliseconds).
+We can set `staleTime: Infinity` for data that doesn't change (eg. enum values).
+
+**Stale** queries are refetched automatically in the background when:
+
+- New instances of the query mount. Configured by `refetchOnMount`.
+- The window is refocused. Configured by `refetchOnWindowFocus`
+- The network is reconnected. Configured by `refetchOnReconnect`
+- The query is optionally configured with a refetch interval. Configured by `refetchInterval`
+
+To pause/disable a query from automatically running, we can use the `enabled` property.
+
+Queries that fail are silently retried 3 times, with exponential backoff delay before capturing and displaying an error to the UI.
+We can control this with the `retry` and `retryDelay` properties.
+Setting `retry: false` will disable retries
+
+Query results that have no more active instances are labeled as `inactive` and remain in the cache in case they are used again at a later time.
+By default, `inactive` queries are garbage collected after 5 minutes.
+This can be configured by the `gcTime` property (in milliseconds).
+
+### Mutations
+
+Mutations are typically used to create/update/delete data or perform server side-effects.
+
+To create mutations we use the `injectMutation` function.
+We must provide a function that return an object with at least a `mutationFn` property.
+We can also optionally define some hooks/callbacks.
+It returns a `MutationResult` object.
+
+<Tabs>
+  <TabItem label="mutation-result.ts">
+    <Code code={mutationResult} lang="ts" />
+  </TabItem>
+  <TabItem label="example-mutation.ts">
+    <Code code={exampleMutation} lang="ts" />
+  </TabItem>
+</Tabs>
+
+#### mutationFn
+
+The `mutationFn` property can be any function that returns a `Promise`.
+If we need parameters for the request we can define them as arguments of this function.

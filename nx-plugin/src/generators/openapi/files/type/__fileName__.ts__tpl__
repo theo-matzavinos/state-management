@@ -1,0 +1,9 @@
+<% for (const ref of imports) { -%>
+import type { <%= ref.typeName %> } from '.<%= ref.file %>';
+<% } -%>
+
+export type <%= name %> = {
+  <% for(const property of properties) { -%>
+    <%= property.name %><%= !property.required ? '?' : '' %>: <%= property.type.replace(/Array<(.+)>/, '$1[]') %>; <% if (property.schema.format?.startsWith('date')) { %>// Date <% } %>
+  <% } -%>
+}

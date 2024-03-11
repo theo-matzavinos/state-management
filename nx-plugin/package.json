@@ -1,0 +1,19 @@
+{
+  "name": "@slg/nx-plugin",
+  "version": "0.0.1",
+  "dependencies": {
+    "@nx/devkit": "18.1.2",
+    "tslib": "^2.3.0",
+    "@nx/angular": "18.1.2",
+    "json-schema-ref-parser": "^9.0.9",
+    "ng-openapi-gen": "^0.51.0",
+    "@phenomnomnominal/tsquery": "5.0.1",
+    "typescript": "~5.4.0",
+    "eslint": "~8.48.0"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts",
+  "generators": "./generators.json",
+  "executors": "./executors.json"
+}

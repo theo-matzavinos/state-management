@@ -1,0 +1,26 @@
+{
+  "name": "api-endpoints",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api/endpoints/src",
+  "prefix": "api",
+  "tags": [],
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:ng-packagr-lite",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "project": "libs/api/endpoints/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/api/endpoints/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/api/endpoints/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    }
+  }
+}

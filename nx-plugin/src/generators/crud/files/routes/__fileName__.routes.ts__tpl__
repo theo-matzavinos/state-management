@@ -1,0 +1,26 @@
+import type { Routes } from '@angular/router';
+import { listRoute } from '@slg/list';
+import { formRoute } from '@slg/form';
+
+const listRoute = listRoute({
+  path: '',
+  pathMatch: 'full',
+  loadComponent: () => import('./<%= fileName %>-list.component'),
+});
+
+const createRoute = formRoute({
+  path: 'new',
+  loadComponent: () => import('./create-<%= fileName %>.component'),
+});
+
+const editRoute = formRoute({
+  path: ':<%= propertyName %>Id',
+  loadComponent: () => import('./edit-<%= fileName %>.component'),
+});
+
+export default [
+  {
+    path: '<%= propertyName %>',
+    children: [listRoute, createRoute, editRoute],
+  },
+] as Routes;

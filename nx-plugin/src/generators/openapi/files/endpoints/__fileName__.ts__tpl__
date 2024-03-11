@@ -1,0 +1,106 @@
+import type { HttpClient } from '@angular/common/http';
+import { lastValueFrom, Observable } from 'rxjs';
+
+<% if (operations.some(op => op.requestBody?.content.some(content => content.mediaType === 'multipart/form-data'))) { %>
+import { toFormData } from '@slg/http';
+<% } %>
+
+import type { <%= getImports() %> } from '@api/dto';
+
+<% for (const op of operations) { -%>
+<% const responseType = getResponseType(op); -%>
+<% const params = getParams(op); -%>
+export const <%= op.methodName %> = (httpClient: HttpClient, <%- params.in %>): Observable<<%- responseType %>> => httpClient.<%= op.method %><<%- responseType %>>(`<%= op.pathExpression %>`,<%- params.out %>);
+export const <%= op.methodName %>Promise = (...args: Parameters<typeof <%= op.methodName %>>): Promise<<%- responseType %>> => lastValueFrom(<%= op.methodName %>(...args));
+<% } -%>
+
+<% function getImports() {
+  const result = [];
+
+  for (const ref of imports) {
+    if (!ref.fullPath.startsWith('fn/') && !result.includes(ref.typeName)) {
+      result.push(ref.typeName);
+    }
+  }
+
+  for (const op of operations) {
+    if (op.requestBody?.content.length) {
+      for (const bodyContent of op.requestBody.content) {
+        if (bodyContent.mediaType === 'multipart/form-data') {
+          const maybeType = bodyContent.type.match(/Array<(.+)>/);
+
+          if (!maybeType) {
+            continue;
+          }
+
+          if (!result.includes(maybeType[1])) {
+            result.push(maybeType[1]);
+          }
+        } else if (bodyContent?.type && !result.includes(bodyContent.type)) {
+          result.push(bodyContent.type)
+        }
+      }
+    }
+  }
+
+  return result.join();
+} %>
+
+<% function getResponseType(op) {
+  if (!op.successResponse) {
+    return 'void';
+  }
+
+  const jsonResponse = op.successResponse.content.find(c => c.mediaType === 'application/json') ?? op.successResponse.content[0];
+  const responseType = jsonResponse?.type ?? 'void';
+
+  if (responseType === 'any') {
+    return 'unknown';
+  }
+
+  return responseType;
+} %>
+
+<% function getParams(op) {
+  const result = { in: '', out: ''};
+  const path = [];
+  const query = [];
+
+  for (const param of op.parameters) {
+    switch (param.in) {
+      case 'path':
+        path.push(param);
+        break;
+      case 'query':
+        query.push(param);
+        break;
+    }
+  }
+
+  if (path.length) {
+    result.in += `params: { ${path.map(p => `${p.name}: ${p.type}`).join()} },`
+  }
+
+  if(op.requestBody?.content.length) {
+    const formDataBody = op.requestBody.content.find(c => c.mediaType === 'multipart/form-data');
+
+      if (formDataBody) {
+        result.in += `body: ${formDataBody.type}, `;
+        result.out += 'toFormData(body), ';
+      } else {
+        const jsonBody = op.requestBody.content.find(c => c.mediaType === 'application/json') ?? op.requestBody.content[0];
+
+        result.in += `body: ${jsonBody.type}, `;
+        result.out += 'body, ';
+    }
+  } else if (op.method === 'post' || op.method === 'put') {
+    result.out += 'undefined, ';
+  }
+
+  if (query.length) {
+    result.in += `queryParams?: Partial<{ ${query.map(p => `${p.name}: ${p.type}`).join()} }>`;
+    result.out += `{ params: queryParams }`;
+  }
+
+  return result;
+} %>

@@ -1,0 +1,19 @@
+---
+title: Delete
+template: doc
+sidebar:
+  order: 6
+---
+
+import { Code, Tabs, TabItem } from '@astrojs/starlight/components';
+import actions from 'apps/docs/snips/store/delete-todo.actions?raw';
+import effects from 'apps/docs/snips/store/delete-todo.effects?raw';
+
+<Tabs>
+  <TabItem label="delete-todo.actions.ts">
+    <Code code={actions} lang="ts" />
+  </TabItem>
+  <TabItem label="delete-todo.effects.ts">
+    <Code code={effects} lang="ts" />
+  </TabItem>
+</Tabs>

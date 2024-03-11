@@ -1,0 +1,21 @@
+{
+  "name": "todos",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/core": "^17.0.0",
+    "@spartan-ng/ui-button-helm": "0.0.1",
+    "@spartan-ng/ui-icon-helm": "0.0.1",
+    "@ng-icons/lucide": "^26.3.0",
+    "@angular/router": "^17.0.0",
+    "@api/dto": "0.0.1",
+    "@angular/forms": "^17.0.0",
+    "@spartan-ng/ui-input-helm": "0.0.1",
+    "@spartan-ng/ui-label-helm": "0.0.1",
+    "@spartan-ng/ui-checkbox-helm": "0.0.1",
+    "@spartan-ng/ui-radiogroup-brain": "0.0.1-alpha.337",
+    "@spartan-ng/ui-radiogroup-helm": "0.0.1",
+    "@spartan-ng/ui-badge-helm": "0.0.1"
+  },
+  "dependencies": {},
+  "sideEffects": false
+}
