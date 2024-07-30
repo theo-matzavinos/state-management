@@ -9,6 +9,8 @@ import { Code, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 import injectQuery from 'apps/docs/snips/query/inject-query?raw';
 import exampleQuery from 'apps/docs/snips/query/example-query?raw';
 import queryResult from 'apps/docs/snips/query/query-result?raw';
+import mutationHooks from 'apps/docs/snips/query/mutation-hooks?raw';
+import injectMutation from 'apps/docs/snips/query/inject-mutation?raw';
 import mutationResult from 'apps/docs/snips/query/mutation-result?raw';
 import exampleMutation from 'apps/docs/snips/query/example-mutation?raw';
 
@@ -116,6 +118,12 @@ We can also optionally define some hooks/callbacks.
 It returns a `MutationResult` object.
 
 <Tabs>
+  <TabItem label="mutation-hooks.ts">
+    <Code code={mutationHooks} lang="ts" />
+  </TabItem>
+  <TabItem label="inject-mutation.ts">
+    <Code code={injectMutation} lang="ts" />
+  </TabItem>
   <TabItem label="mutation-result.ts">
     <Code code={mutationResult} lang="ts" />
   </TabItem>
@@ -128,3 +136,15 @@ It returns a `MutationResult` object.
 
 The `mutationFn` property can be any function that returns a `Promise`.
 If we need parameters for the request we can define them as arguments of this function.
+
+#### Hooks
+
+We can provide callbacks to hook into the lifecycle of the mutation.
+This can be done in `injectMutation` or when calling `mutate` on the `MutationResult`.
+
+<Aside>
+  Callbacks defined in `injectMutation` will be called for every request.
+  Callbacks defined in `mutate` will **only** be called for the last request if
+  there are multiple simultaneous request and will not be called if the
+  component is destroyed.
+</Aside>
